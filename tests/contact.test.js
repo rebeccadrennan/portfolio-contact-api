@@ -38,6 +38,7 @@ describe('POST /api/contact', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe('Message sent successfully.');
+    expect(res.headers['x-request-id']).toBeDefined();
     expect(sendContactEmail).toHaveBeenCalledTimes(1);
     expect(sendContactEmail).toHaveBeenCalledWith({
       name: validBody.name,
@@ -193,14 +194,44 @@ describe('POST /api/contact', () => {
 
     expect(res.status).toBe(500);
     expect(res.body.success).toBe(false);
+    expect(res.body.requestId).toBeTruthy();
   });
 
-  // ─── Health Check ─────────────────────────────────────────────────────────
+  // ─── Service Metadata & Health Check ─────────────────────────────────────
+
+  it('GET / returns API metadata and links', async () => {
+    const res = await request(app).get('/');
+    expect(res.status).toBe(200);
+    expect(res.body.service).toBe('portfolio-contact-api');
+    expect(res.body.docs).toBe('/docs');
+    expect(res.body.openApi).toBe('/openapi.json');
+    expect(res.body.health).toBe('/health');
+  });
 
   it('GET /health returns ok', async () => {
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('ok');
+    expect(res.body.service).toBe('portfolio-contact-api');
+    expect(res.body.version).toBe('1.0.0');
+    expect(res.body.environment).toBe('test');
+    expect(typeof res.body.uptimeSeconds).toBe('number');
+    expect(res.body.startedAt).toBeTruthy();
+    expect(res.body.timestamp).toBeTruthy();
+  });
+
+  it('GET /openapi.json returns OpenAPI document', async () => {
+    const res = await request(app).get('/openapi.json');
+    expect(res.status).toBe(200);
+    expect(res.body.openapi).toBe('3.1.0');
+    expect(res.body.paths['/api/contact']).toBeDefined();
+  });
+
+  it('GET /docs returns HTML docs page', async () => {
+    const res = await request(app).get('/docs');
+    expect(res.status).toBe(200);
+    expect(res.type).toMatch(/html/);
+    expect(res.text).toContain('/docs/swagger-initializer.js');
   });
 
   // ─── 404 ──────────────────────────────────────────────────────────────────
