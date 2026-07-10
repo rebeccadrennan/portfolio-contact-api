@@ -5,6 +5,10 @@
 
 A production-ready **Node.js + Express** backend service that powers the contact form on my React portfolio. It validates incoming form data, rate-limits submissions, and delivers messages to my inbox via Gmail SMTP — all without exposing credentials to the client.
 
+## Demo
+
+![Swagger UI demo](src/assets/swaggerDemo.gif)
+
 ---
 
 ## Table of Contents
