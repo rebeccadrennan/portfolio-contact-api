@@ -162,7 +162,7 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `PORT` | Port the server listens on (default: `3000`) |
+| `PORT` | Optional. Port the server listens on. Defaults to `3000` locally and is usually provided by your host in production |
 | `NODE_ENV` | `development` \| `production` \| `test` |
 | `FRONTEND_URL` | Your React app's origin (used for CORS) |
 | `SMTP_HOST` | `smtp.gmail.com` |

@@ -13,15 +13,12 @@ const required = [
 
 const missing = required.filter((key) => !process.env[key]);
 
-if (missing.length > 0 && process.env.NODE_ENV !== 'test') {
-  throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-}
-
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  missing,
   smtp: {
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT, 10) || 465,
