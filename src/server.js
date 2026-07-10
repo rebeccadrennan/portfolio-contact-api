@@ -13,6 +13,11 @@ if (!process.env.PORT && env.nodeEnv !== 'test') {
   console.warn('PORT is not set; defaulting to 3000.');
 }
 
+if (env.nodeEnv !== 'test') {
+  // eslint-disable-next-line no-console
+  console.log(`Allowed CORS origins: ${env.allowedOrigins.join(', ')}`);
+}
+
 app.listen(env.port, () => {
   // eslint-disable-next-line no-console
   console.log(`Server running on port ${env.port} [${env.nodeEnv}]`);

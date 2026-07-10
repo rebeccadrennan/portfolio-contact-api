@@ -12,12 +12,14 @@ const required = [
 ];
 
 const missing = required.filter((key) => !process.env[key]);
+const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
 
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  frontendUrl: process.env.FRONTEND_URL || '',
+  allowedOrigins: [...new Set(allowedOrigins)],
   missing,
   smtp: {
     host: process.env.SMTP_HOST,

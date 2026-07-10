@@ -33,7 +33,7 @@ jobs:
         run: npm test
         env:
           NODE_ENV: test
-          FRONTEND_URL: http://localhost:5173
+          FRONTEND_URL: https://www.rebeccadrennan.co.uk
           SMTP_HOST: smtp.gmail.com
           SMTP_PORT: '465'
           SMTP_USER: test@example.com

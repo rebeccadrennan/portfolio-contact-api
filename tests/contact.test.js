@@ -1,7 +1,7 @@
 'use strict';
 
 process.env.NODE_ENV = 'test';
-process.env.FRONTEND_URL = 'http://localhost:5173';
+process.env.FRONTEND_URL = 'https://www.rebeccadrennan.co.uk';
 process.env.SMTP_HOST = 'smtp.gmail.com';
 process.env.SMTP_PORT = '465';
 process.env.SMTP_USER = 'test@example.com';
@@ -195,6 +195,35 @@ describe('POST /api/contact', () => {
     expect(res.status).toBe(500);
     expect(res.body.success).toBe(false);
     expect(res.body.requestId).toBeTruthy();
+  });
+
+  // ─── CORS ───────────────────────────────────────────────────────────────────
+
+  it('OPTIONS /api/contact allows preflight from https://www.rebeccadrennan.co.uk', async () => {
+    const res = await request(app)
+      .options('/api/contact')
+      .set('Origin', 'https://www.rebeccadrennan.co.uk')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'Content-Type');
+
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-origin']).toBe('https://www.rebeccadrennan.co.uk');
+    expect(res.headers['access-control-allow-methods']).toContain('GET');
+    expect(res.headers['access-control-allow-methods']).toContain('POST');
+    expect(res.headers['access-control-allow-methods']).toContain('OPTIONS');
+    expect(res.headers['access-control-allow-headers']).toContain('Content-Type');
+  });
+
+  it('rejects OPTIONS preflight from an unknown origin', async () => {
+    const res = await request(app)
+      .options('/api/contact')
+      .set('Origin', 'https://evil.example')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'Content-Type');
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.headers['access-control-allow-origin']).toBeUndefined();
   });
 
   // ─── Service Metadata & Health Check ─────────────────────────────────────

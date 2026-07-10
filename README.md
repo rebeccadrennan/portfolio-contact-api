@@ -191,7 +191,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The server starts at `http://localhost:3000`.
+The server starts on the configured `PORT`.
 
 ---
 
