@@ -18,8 +18,6 @@ if (env.nodeEnv !== 'test') {
   console.log(`Allowed CORS origins: ${env.allowedOrigins.join(', ')}`);
 }
 
-let server;
-
 const onListening = () => {
   const address = server.address();
   const bind = typeof address === 'string' ? address : `${address.address}:${address.port}`;
@@ -28,4 +26,4 @@ const onListening = () => {
   console.log(`Server running on ${bind} [${env.nodeEnv}]`);
 };
 
-server = env.host ? app.listen(env.port, env.host, onListening) : app.listen(env.port, onListening);
+const server = env.host ? app.listen(env.port, env.host, onListening) : app.listen(env.port, onListening);
