@@ -37,7 +37,7 @@ const allowedOrigins = [frontendOrigin, getAlternateSubdomainOrigin(frontendOrig
 
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
-  host: process.env.HOST || '0.0.0.0',
+  host: process.env.HOST,
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction: process.env.NODE_ENV === 'production',
   frontendUrl: process.env.FRONTEND_URL || '',
