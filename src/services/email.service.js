@@ -46,14 +46,21 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
     message,
   ].join('\n');
 
-  await transporter.sendMail({
-    from: `"Portfolio Contact" <${env.smtp.user}>`,
-    to: env.contactToEmail,
-    replyTo: email,
-    subject: `[Contact] ${subject}`,
-    text,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"Portfolio Contact" <${env.smtp.user}>`,
+      to: env.contactToEmail,
+      replyTo: email,
+      subject: `[Contact] ${subject}`,
+      text,
+      html,
+    });
+  } catch (cause) {
+    const error = new Error('Email service is temporarily unavailable.');
+    error.status = 503;
+    error.cause = cause;
+    throw error;
+  }
 };
 
 /** Minimal HTML escaping for plain string values in HTML email bodies. */
