@@ -3,12 +3,22 @@
 const transporter = require('../config/mailer');
 const env = require('../config/env');
 
+const smtpConfigMissing = env.missing;
+
 /**
  * Sends a contact form email.
  * @param {{ name: string, email: string, subject: string, message: string }} data
  * @returns {Promise<void>}
  */
 const sendContactEmail = async ({ name, email, subject, message }) => {
+  if (smtpConfigMissing.length > 0) {
+    const error = new Error(
+      `Email service is not configured. Missing: ${smtpConfigMissing.join(', ')}`
+    );
+    error.status = 503;
+    throw error;
+  }
+
   const timestamp = new Date().toUTCString();
 
   const html = `
