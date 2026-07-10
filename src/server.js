@@ -18,7 +18,7 @@ if (env.nodeEnv !== 'test') {
   console.log(`Allowed CORS origins: ${env.allowedOrigins.join(', ')}`);
 }
 
-app.listen(env.port, () => {
+app.listen(env.port, env.host, () => {
   // eslint-disable-next-line no-console
-  console.log(`Server running on port ${env.port} [${env.nodeEnv}]`);
+  console.log(`Server running on ${env.host}:${env.port} [${env.nodeEnv}]`);
 });
