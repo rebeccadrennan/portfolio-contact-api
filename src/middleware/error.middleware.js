@@ -15,6 +15,7 @@ const errorHandler = (err, req, res, _next) => {
     message: isProduction
       ? 'Sorry, something went wrong. Please try again later.'
       : err.message || 'Internal Server Error',
+    requestId: req.requestId,
   });
 };
 
