@@ -214,6 +214,17 @@ describe('POST /api/contact', () => {
     expect(res.headers['access-control-allow-headers']).toContain('Content-Type');
   });
 
+  it('OPTIONS /api/contact allows preflight from https://rebeccadrennan.co.uk', async () => {
+    const res = await request(app)
+      .options('/api/contact')
+      .set('Origin', 'https://rebeccadrennan.co.uk')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'Content-Type');
+
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-origin']).toBe('https://rebeccadrennan.co.uk');
+  });
+
   it('rejects OPTIONS preflight from an unknown origin', async () => {
     const res = await request(app)
       .options('/api/contact')

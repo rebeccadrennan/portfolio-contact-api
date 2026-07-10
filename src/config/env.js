@@ -12,7 +12,28 @@ const required = [
 ];
 
 const missing = required.filter((key) => !process.env[key]);
-const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
+const frontendOrigin = process.env.FRONTEND_URL;
+
+const getAlternateSubdomainOrigin = (origin) => {
+  if (!origin) return null;
+
+  try {
+    const parsed = new URL(origin);
+    const { hostname } = parsed;
+
+    if (hostname.startsWith('www.')) {
+      parsed.hostname = hostname.slice(4);
+      return parsed.toString().replace(/\/$/, '');
+    }
+
+    parsed.hostname = `www.${hostname}`;
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return null;
+  }
+};
+
+const allowedOrigins = [frontendOrigin, getAlternateSubdomainOrigin(frontendOrigin)].filter(Boolean);
 
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
