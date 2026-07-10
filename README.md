@@ -12,6 +12,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [API Documentation](#api-documentation)
+- [Operational Endpoints](#operational-endpoints)
 - [Environment Variables](#environment-variables)
 - [Local Development](#local-development)
 - [Creating a Google App Password](#creating-a-google-app-password)
@@ -26,12 +27,15 @@ A production-ready **Node.js + Express** backend service that powers the contact
 ## Features
 
 - **POST /api/contact** — receives and delivers contact form submissions
+- **Interactive API docs** at `GET /docs` powered by Swagger UI
+- **OpenAPI 3.1 spec** at `GET /openapi.json`
 - **Input validation** with [Zod](https://zod.dev/) — required fields, length limits, email format, HTML/script injection rejection
 - **Rate limiting** — 5 requests per IP per 15 minutes on the contact endpoint
 - **Security headers** via [Helmet](https://helmetjs.github.io/)
 - **CORS** restricted to your frontend origin
 - **10 kb JSON body limit** to prevent abuse
 - **Centralised error handling** — no stack traces leaked in production
+- **Request correlation IDs** (`x-request-id`) on every response for easier debugging and support
 - **Gmail SMTP** via Nodemailer using a Google App Password (never your real password)
 - **Comprehensive test suite** — Jest + Supertest with mocked email service
 - **GitHub Actions CI** — runs lint and tests on every push and pull request
@@ -123,9 +127,23 @@ All string inputs are trimmed automatically.
 
 ---
 
+## Operational Endpoints
+
+### `GET /`
+
+Returns service metadata and quick links to docs and health endpoints.
+
 ### `GET /health`
 
-Returns `{ "status": "ok" }` — useful for uptime monitors and deployment health checks.
+Returns health and runtime metadata (status, version, environment, uptime, timestamps) for uptime monitors and deployment diagnostics.
+
+### `GET /openapi.json`
+
+Returns the OpenAPI 3.1 document for this API.
+
+### `GET /docs`
+
+Serves interactive Swagger UI documentation using the local OpenAPI document.
 
 ---
 
@@ -259,6 +277,9 @@ function ContactForm() {
 # Run all tests
 npm test
 
+# Run tests with coverage output
+npm run test:coverage
+
 # Lint
 npm run lint
 
@@ -267,6 +288,9 @@ npm run lint:fix
 
 # Format with Prettier
 npm run format
+
+# Run lint + test together (great for pre-push)
+npm run check
 ```
 
 Tests use **Jest + Supertest** and mock the email service so no real SMTP calls are made.  
@@ -325,7 +349,6 @@ fly deploy
 - [ ] Send a confirmation email back to the sender
 - [ ] Add Turnstile / reCAPTCHA v3 for bot protection
 - [ ] Slack / Discord webhook notification as an alternative delivery channel
-- [ ] OpenAPI / Swagger documentation
 - [ ] Docker / docker-compose setup for local development
 
 ---
