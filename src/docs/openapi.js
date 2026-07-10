@@ -12,8 +12,10 @@ const openApi = {
   },
   servers: [
     {
-      url: env.isProduction ? 'https://your-api-host.example.com' : `http://localhost:${env.port}`,
-      description: env.isProduction ? 'Production' : 'Local development',
+      url: env.isProduction
+        ? 'https://your-api-host.example.com'
+        : 'https://dev-api-host.example.com',
+      description: env.isProduction ? 'Production' : 'Development',
     },
   ],
   tags: [

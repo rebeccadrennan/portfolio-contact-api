@@ -24,13 +24,23 @@ app.use(requestId);
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet());
 
-app.use(
-  cors({
-    origin: env.frontendUrl,
-    methods: ['POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || env.allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    const error = new Error(`Origin not allowed by CORS: ${origin}`);
+    error.status = 403;
+    return callback(error);
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ─── Parsing & Compression ────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
