@@ -3,15 +3,14 @@
 require('dotenv').config();
 
 const required = [
-  'SMTP_HOST',
-  'SMTP_PORT',
-  'SMTP_USER',
-  'SMTP_APP_PASSWORD',
-  'CONTACT_TO_EMAIL',
   'FRONTEND_URL',
+  'RESEND_API_KEY',
 ];
 
 const missing = required.filter((key) => !process.env[key]);
+if (!process.env.CONTACT_TO_EMAIL && !process.env.CONTACT_EMAIL) {
+  missing.push('CONTACT_TO_EMAIL');
+}
 const frontendOrigin = process.env.FRONTEND_URL;
 
 const getAlternateSubdomainOrigin = (origin) => {
@@ -43,11 +42,7 @@ module.exports = {
   frontendUrl: process.env.FRONTEND_URL || '',
   allowedOrigins: [...new Set(allowedOrigins)],
   missing,
-  smtp: {
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT, 10) || 465,
-    user: process.env.SMTP_USER,
-    password: process.env.SMTP_APP_PASSWORD,
-  },
-  contactToEmail: process.env.CONTACT_TO_EMAIL,
+  resendApiKey: process.env.RESEND_API_KEY,
+  resendFrom: process.env.RESEND_FROM || 'Portfolio Contact <onboarding@resend.dev>',
+  contactToEmail: process.env.CONTACT_TO_EMAIL || process.env.CONTACT_EMAIL,
 };

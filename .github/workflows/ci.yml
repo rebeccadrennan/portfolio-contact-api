@@ -34,8 +34,5 @@ jobs:
         env:
           NODE_ENV: test
           FRONTEND_URL: https://www.rebeccadrennan.co.uk
-          SMTP_HOST: smtp.gmail.com
-          SMTP_PORT: '465'
-          SMTP_USER: test@example.com
-          SMTP_APP_PASSWORD: test_password
+          RESEND_API_KEY: re_test_key
           CONTACT_TO_EMAIL: owner@example.com

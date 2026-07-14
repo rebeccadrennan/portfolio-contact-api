@@ -1,9 +1,10 @@
 'use strict';
 
-const transporter = require('../config/mailer');
+const { Resend } = require('resend');
 const env = require('../config/env');
 
-const smtpConfigMissing = env.missing;
+const resendClient = env.resendApiKey ? new Resend(env.resendApiKey) : null;
+const resendConfigMissing = env.missing;
 
 /**
  * Sends a contact form email.
@@ -11,10 +12,16 @@ const smtpConfigMissing = env.missing;
  * @returns {Promise<void>}
  */
 const sendContactEmail = async ({ name, email, subject, message }) => {
-  if (smtpConfigMissing.length > 0) {
+  if (resendConfigMissing.length > 0) {
     const error = new Error(
-      `Email service is not configured. Missing: ${smtpConfigMissing.join(', ')}`
+      `Email service is not configured. Missing: ${resendConfigMissing.join(', ')}`
     );
+    error.status = 503;
+    throw error;
+  }
+
+  if (!resendClient) {
+    const error = new Error('Email service is not configured. Missing: RESEND_API_KEY');
     error.status = 503;
     throw error;
   }
@@ -47,14 +54,20 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
   ].join('\n');
 
   try {
-    await transporter.sendMail({
-      from: `"Portfolio Contact" <${env.smtp.user}>`,
+    const result = await resendClient.emails.send({
+      from: env.resendFrom,
       to: env.contactToEmail,
       replyTo: email,
       subject: `[Contact] ${subject}`,
       text,
       html,
     });
+
+    if (result && result.error) {
+      const failure = new Error(result.error.message || 'Resend API request failed.');
+      failure.code = result.error.name || result.error.code;
+      throw failure;
+    }
   } catch (cause) {
     if (env.nodeEnv !== 'test') {
       // eslint-disable-next-line no-console
