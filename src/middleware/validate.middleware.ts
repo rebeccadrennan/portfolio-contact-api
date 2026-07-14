@@ -1,10 +1,11 @@
-'use strict';
+import type { RequestHandler } from 'express';
+import type { ZodTypeAny } from 'zod';
 
 /**
  * Returns an Express middleware that validates req.body against a Zod schema.
  * On failure it responds with 422 and a structured errors array.
  */
-const validate = (schema) => (req, res, next) => {
+const validate = (schema: ZodTypeAny): RequestHandler => (req, res, next) => {
   const result = schema.safeParse(req.body);
 
   if (!result.success) {
@@ -25,4 +26,4 @@ const validate = (schema) => (req, res, next) => {
   return next();
 };
 
-module.exports = validate;
+export default validate;

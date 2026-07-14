@@ -1,18 +1,16 @@
-'use strict';
+import compression from 'compression';
+import cors, { type CorsOptions } from 'cors';
+import express, { type Request, type Response } from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import swaggerUiDist from 'swagger-ui-dist';
 
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const compression = require('compression');
-const morgan = require('morgan');
-const swaggerUiDist = require('swagger-ui-dist');
-
-const env = require('./config/env');
-const meta = require('./config/meta');
-const openApi = require('./docs/openapi');
-const contactRoutes = require('./routes/contact.routes');
-const errorHandler = require('./middleware/error.middleware');
-const requestId = require('./middleware/requestId.middleware');
+import env from './config/env';
+import meta from './config/meta';
+import openApi from './docs/openapi';
+import errorHandler from './middleware/error.middleware';
+import requestId from './middleware/requestId.middleware';
+import contactRoutes from './routes/contact.routes';
 
 const app = express();
 const startedAt = new Date();
@@ -25,13 +23,13 @@ app.use(requestId);
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet());
 
-const corsOptions = {
+const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
     if (!origin || env.allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    const error = new Error(`Origin not allowed by CORS: ${origin}`);
+    const error = new Error(`Origin not allowed by CORS: ${origin}`) as Error & { status?: number };
     error.status = 403;
     return callback(error);
   },
@@ -54,7 +52,7 @@ if (env.nodeEnv !== 'test') {
 }
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.get('/', (_req, res) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({
     service: meta.appName,
     version: meta.appVersion,
@@ -65,7 +63,7 @@ app.get('/', (_req, res) => {
   });
 });
 
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
     service: meta.appName,
@@ -77,19 +75,19 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.get('/openapi.json', (_req, res) => {
+app.get('/openapi.json', (_req: Request, res: Response) => {
   res.type('application/json').status(200).json(openApi);
 });
 
 app.use('/docs/assets', express.static(swaggerAssetsPath));
 
-app.get('/docs/swagger-initializer.js', (_req, res) => {
+app.get('/docs/swagger-initializer.js', (_req: Request, res: Response) => {
   res.type('application/javascript').send(
     "window.ui = SwaggerUIBundle({ url: '/openapi.json', dom_id: '#swagger-ui', presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset], layout: 'BaseLayout' });"
   );
 });
 
-app.get('/docs', (_req, res) => {
+app.get('/docs', (_req: Request, res: Response) => {
   res.type('html').send(`<!doctype html>
 <html lang="en">
   <head>
@@ -110,11 +108,11 @@ app.get('/docs', (_req, res) => {
 app.use('/api/contact', contactRoutes);
 
 // 404
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, message: 'Not found.' });
 });
 
 // ─── Error Handler ────────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

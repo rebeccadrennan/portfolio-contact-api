@@ -3,7 +3,7 @@
 [![CI](https://github.com/rebeccadrennan/portfolio-contact-api/actions/workflows/ci.yml/badge.svg)](https://github.com/rebeccadrennan/portfolio-contact-api/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A production-ready **Node.js + Express** backend service that powers the contact form on my React portfolio. It validates incoming form data, rate-limits submissions, and delivers messages to my inbox via Resend over HTTPS — all without exposing credentials to the client.
+A production-ready **Node.js + Express** backend service that powers the contact form on my React portfolio. It validates incoming form data, rate-limits submissions, and delivers messages via Resend over HTTPS to my Porkbun-hosted domain inbox — all without exposing credentials to the client.
 
 ## Demo
 
@@ -40,7 +40,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 - **10 kb JSON body limit** to prevent abuse
 - **Centralised error handling** — no stack traces leaked in production
 - **Request correlation IDs** (`x-request-id`) on every response for easier debugging and support
-- **Resend Email API** over HTTPS for reliable hosted delivery
+- **Resend Email API** over HTTPS for reliable hosted delivery to a Porkbun domain mailbox
 - **Comprehensive test suite** — Jest + Supertest with mocked email service
 - **GitHub Actions CI** — runs lint and tests on every push and pull request
 - **Clean architecture** — config / routes / controllers / services / middleware / validators
@@ -53,7 +53,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 |---|---|
 | Runtime | Node.js ≥ 18 |
 | Framework | Express 4 |
-| Email | Resend API (HTTPS) |
+| Email | Resend API (HTTPS) + Porkbun domain inbox |
 | Validation | Zod |
 | Security | Helmet, CORS, express-rate-limit |
 | Logging | Morgan |
@@ -167,7 +167,7 @@ cp .env.example .env
 | `FRONTEND_URL` | Your React app's origin (used for CORS) |
 | `RESEND_API_KEY` | Resend API key used to send contact emails over HTTPS |
 | `RESEND_FROM` | Optional from address shown in outgoing emails (default: `Portfolio Contact <onboarding@resend.dev>`) |
-| `CONTACT_TO_EMAIL` | The inbox that receives submissions |
+| `CONTACT_TO_EMAIL` | The Porkbun domain inbox that receives submissions |
 
 ---
 
@@ -199,7 +199,7 @@ Use Resend to deliver contact emails over HTTPS (port 443), which is typically m
 
 1. Create a Resend account and generate an API key.
 2. Add `RESEND_API_KEY` to your environment variables.
-3. Set `CONTACT_TO_EMAIL` to your inbox address.
+3. Set `CONTACT_TO_EMAIL` to your Porkbun domain inbox address.
 4. Optionally set `RESEND_FROM`.
 
 > ⚠️ Treat API keys like secrets. Store them only in environment variables, never in source code.
@@ -268,7 +268,7 @@ function ContactForm() {
 }
 ```
 
-> 🔒 SMTP credentials live **only on the server**. The React app never sees them.
+> 🔒 Email provider secrets live **only on the server**. The React app never sees them.
 
 ---
 
@@ -294,7 +294,7 @@ npm run format
 npm run check
 ```
 
-Tests use **Jest + Supertest** and mock the email service so no real SMTP calls are made.  
+Tests use **Jest + Supertest** and mock the email service so no real email API calls are made.  
 Coverage includes: successful submission, missing fields, invalid email, short message, HTML injection rejection, email service failure, health check, and 404.
 
 ---

@@ -1,27 +1,46 @@
-'use strict';
+import { Resend } from 'resend';
 
-const { Resend } = require('resend');
-const env = require('../config/env');
+import env from '../config/env';
+
+interface ContactEmailPayload {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+type ServiceError = Error & {
+  status?: number;
+  code?: string;
+  cause?: unknown;
+  command?: string;
+  responseCode?: number;
+};
 
 const resendClient = env.resendApiKey ? new Resend(env.resendApiKey) : null;
 const resendConfigMissing = env.missing;
 
 /**
  * Sends a contact form email.
- * @param {{ name: string, email: string, subject: string, message: string }} data
+ * @param data Contact payload from the validated API request.
  * @returns {Promise<void>}
  */
-const sendContactEmail = async ({ name, email, subject, message }) => {
+export const sendContactEmail = async ({
+  name,
+  email,
+  subject,
+  message,
+}: ContactEmailPayload): Promise<void> => {
   if (resendConfigMissing.length > 0) {
     const error = new Error(
       `Email service is not configured. Missing: ${resendConfigMissing.join(', ')}`
-    );
+    ) as ServiceError;
     error.status = 503;
     throw error;
   }
 
   if (!resendClient) {
-    const error = new Error('Email service is not configured. Missing: RESEND_API_KEY');
+    const error = new Error('Email service is not configured. Missing: RESEND_API_KEY') as ServiceError;
     error.status = 503;
     throw error;
   }
@@ -56,7 +75,7 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
   try {
     const result = await resendClient.emails.send({
       from: env.resendFrom,
-      to: env.contactToEmail,
+      to: env.contactToEmail as string,
       replyTo: email,
       subject: `[Contact] ${subject}`,
       text,
@@ -64,22 +83,24 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
     });
 
     if (result && result.error) {
-      const failure = new Error(result.error.message || 'Resend API request failed.');
-      failure.code = result.error.name || result.error.code;
+      const failure = new Error(result.error.message || 'Resend API request failed.') as ServiceError;
+      failure.code = result.error.name || 'resend_error';
       throw failure;
     }
-  } catch (cause) {
+  } catch (cause: unknown) {
+    const causeError = cause as Partial<ServiceError>;
+
     if (env.nodeEnv !== 'test') {
       // eslint-disable-next-line no-console
       console.error('Contact email delivery failed', {
-        code: cause && cause.code,
-        message: cause && cause.message,
-        command: cause && cause.command,
-        responseCode: cause && cause.responseCode,
+        code: causeError?.code,
+        message: causeError?.message,
+        command: causeError?.command,
+        responseCode: causeError?.responseCode,
       });
     }
 
-    const error = new Error('Email service is temporarily unavailable.');
+    const error = new Error('Email service is temporarily unavailable.') as ServiceError;
     error.status = 503;
     error.cause = cause;
     throw error;
@@ -87,7 +108,7 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
 };
 
 /** Minimal HTML escaping for plain string values in HTML email bodies. */
-function escapeHtml(str) {
+function escapeHtml(str: string): string {
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -95,5 +116,3 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-
-module.exports = { sendContactEmail };

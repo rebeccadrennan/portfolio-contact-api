@@ -1,7 +1,5 @@
-'use strict';
-
-const env = require('../config/env');
-const meta = require('../config/meta');
+import env from '../config/env';
+import meta from '../config/meta';
 
 const openApi = {
   openapi: '3.1.0',
@@ -175,4 +173,4 @@ const openApi = {
   },
 };
 
-module.exports = openApi;
+export default openApi;

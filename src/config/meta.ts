@@ -1,9 +1,9 @@
-'use strict';
+import packageJson from '../../package.json';
 
-const packageJson = require('../../package.json');
-
-module.exports = {
+const meta = {
   appName: packageJson.name,
   appVersion: packageJson.version,
   appDescription: packageJson.description,
 };
+
+export default meta;

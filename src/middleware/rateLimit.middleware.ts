@@ -1,8 +1,6 @@
-'use strict';
+import rateLimit from 'express-rate-limit';
 
-const rateLimit = require('express-rate-limit');
-
-const contactRateLimit = rateLimit({
+export const contactRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5,
   standardHeaders: true,
@@ -13,5 +11,3 @@ const contactRateLimit = rateLimit({
   },
   skip: () => process.env.NODE_ENV === 'test',
 });
-
-module.exports = { contactRateLimit };

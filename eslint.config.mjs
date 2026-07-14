@@ -1,12 +1,15 @@
 import globals from 'globals';
 import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
 export default [
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
+    files: ['**/*.ts'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
         ...globals.jest,
@@ -21,6 +24,6 @@ export default [
     },
   },
   {
-    ignores: ['node_modules/', 'coverage/', 'dist/'],
+    ignores: ['node_modules/', 'coverage/', 'dist/', 'src/assets/'],
   },
 ];

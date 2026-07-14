@@ -1,19 +1,20 @@
-'use strict';
-
 process.env.NODE_ENV = 'test';
 process.env.FRONTEND_URL = 'https://www.rebeccadrennan.co.uk';
 process.env.RESEND_API_KEY = 're_test_key';
 process.env.CONTACT_TO_EMAIL = 'owner@example.com';
 
-const request = require('supertest');
-const app = require('../src/app');
+import request from 'supertest';
 
-// Mock the email service so no real SMTP calls are made
+import app from '../src/app';
+
+// Mock the email service so no real email API calls are made
 jest.mock('../src/services/email.service', () => ({
   sendContactEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
-const { sendContactEmail } = require('../src/services/email.service');
+import { sendContactEmail } from '../src/services/email.service';
+
+const mockedSendContactEmail = jest.mocked(sendContactEmail);
 
 const validBody = {
   name: 'Rebecca Drennan',
@@ -24,7 +25,7 @@ const validBody = {
 
 describe('POST /api/contact', () => {
   beforeEach(() => {
-    sendContactEmail.mockClear();
+    mockedSendContactEmail.mockClear();
   });
 
   // ─── Success ──────────────────────────────────────────────────────────────
@@ -36,8 +37,8 @@ describe('POST /api/contact', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe('Message sent successfully.');
     expect(res.headers['x-request-id']).toBeDefined();
-    expect(sendContactEmail).toHaveBeenCalledTimes(1);
-    expect(sendContactEmail).toHaveBeenCalledWith({
+    expect(mockedSendContactEmail).toHaveBeenCalledTimes(1);
+    expect(mockedSendContactEmail).toHaveBeenCalledWith({
       name: validBody.name,
       email: validBody.email,
       subject: validBody.subject,
@@ -51,7 +52,7 @@ describe('POST /api/contact', () => {
       .send({ ...validBody, name: '  Rebecca  ', subject: '  Job  ' });
 
     expect(res.status).toBe(200);
-    const callArg = sendContactEmail.mock.calls[0][0];
+    const callArg = mockedSendContactEmail.mock.calls[0][0];
     expect(callArg.name).toBe('Rebecca');
     expect(callArg.subject).toBe('Job');
   });
@@ -59,7 +60,8 @@ describe('POST /api/contact', () => {
   // ─── Missing Fields ───────────────────────────────────────────────────────
 
   it('returns 422 when name is missing', async () => {
-    const { name: _name, ...body } = validBody;
+    const body = { ...validBody };
+    delete body.name;
     const res = await request(app).post('/api/contact').send(body);
 
     expect(res.status).toBe(422);
@@ -68,11 +70,12 @@ describe('POST /api/contact', () => {
     expect(res.body.errors).toEqual(
       expect.arrayContaining([expect.objectContaining({ field: 'name' })])
     );
-    expect(sendContactEmail).not.toHaveBeenCalled();
+    expect(mockedSendContactEmail).not.toHaveBeenCalled();
   });
 
   it('returns 422 when email is missing', async () => {
-    const { email: _email, ...body } = validBody;
+    const body = { ...validBody };
+    delete body.email;
     const res = await request(app).post('/api/contact').send(body);
 
     expect(res.status).toBe(422);
@@ -82,7 +85,8 @@ describe('POST /api/contact', () => {
   });
 
   it('returns 422 when subject is missing', async () => {
-    const { subject: _subject, ...body } = validBody;
+    const body = { ...validBody };
+    delete body.subject;
     const res = await request(app).post('/api/contact').send(body);
 
     expect(res.status).toBe(422);
@@ -92,7 +96,8 @@ describe('POST /api/contact', () => {
   });
 
   it('returns 422 when message is missing', async () => {
-    const { message: _message, ...body } = validBody;
+    const body = { ...validBody };
+    delete body.message;
     const res = await request(app).post('/api/contact').send(body);
 
     expect(res.status).toBe(422);
@@ -185,7 +190,7 @@ describe('POST /api/contact', () => {
   // ─── Email Service Failure ────────────────────────────────────────────────
 
   it('returns 500 when the email service throws', async () => {
-    sendContactEmail.mockRejectedValueOnce(new Error('SMTP connection refused'));
+    mockedSendContactEmail.mockRejectedValueOnce(new Error('Email API request failed'));
 
     const res = await request(app).post('/api/contact').send(validBody);
 

@@ -1,11 +1,9 @@
-'use strict';
+import dns from 'node:dns';
 
-const dns = require('dns');
+import app from './app';
+import env from './config/env';
 
 dns.setDefaultResultOrder('ipv4first');
-
-const app = require('./app');
-const env = require('./config/env');
 
 if (env.missing.length > 0 && env.nodeEnv !== 'test') {
   // eslint-disable-next-line no-console
