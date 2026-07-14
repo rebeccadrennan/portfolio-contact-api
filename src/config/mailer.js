@@ -16,4 +16,22 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+if (env.nodeEnv !== 'test') {
+  transporter
+    .verify()
+    .then(() => {
+      // eslint-disable-next-line no-console
+      console.log('SMTP transporter is ready');
+    })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('SMTP transporter verification failed', {
+        code: error && error.code,
+        message: error && error.message,
+        command: error && error.command,
+        responseCode: error && error.responseCode,
+      });
+    });
+}
+
 module.exports = transporter;
