@@ -56,6 +56,16 @@ const sendContactEmail = async ({ name, email, subject, message }) => {
       html,
     });
   } catch (cause) {
+    if (env.nodeEnv !== 'test') {
+      // eslint-disable-next-line no-console
+      console.error('Contact email delivery failed', {
+        code: cause && cause.code,
+        message: cause && cause.message,
+        command: cause && cause.command,
+        responseCode: cause && cause.responseCode,
+      });
+    }
+
     const error = new Error('Email service is temporarily unavailable.');
     error.status = 503;
     error.cause = cause;
