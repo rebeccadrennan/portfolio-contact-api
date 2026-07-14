@@ -3,7 +3,7 @@
 [![CI](https://github.com/rebeccadrennan/portfolio-contact-api/actions/workflows/ci.yml/badge.svg)](https://github.com/rebeccadrennan/portfolio-contact-api/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A production-ready **Node.js + Express** backend service that powers the contact form on my React portfolio. It validates incoming form data, rate-limits submissions, and delivers messages to my inbox via Gmail SMTP — all without exposing credentials to the client.
+A production-ready **Node.js + Express** backend service that powers the contact form on my React portfolio. It validates incoming form data, rate-limits submissions, and delivers messages to my inbox via Resend over HTTPS — all without exposing credentials to the client.
 
 ## Demo
 
@@ -19,7 +19,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 - [Operational Endpoints](#operational-endpoints)
 - [Environment Variables](#environment-variables)
 - [Local Development](#local-development)
-- [Creating a Google App Password](#creating-a-google-app-password)
+- [Configuring Resend](#configuring-resend)
 - [React Integration](#react-integration)
 - [Running Tests](#running-tests)
 - [Deployment](#deployment)
@@ -40,7 +40,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 - **10 kb JSON body limit** to prevent abuse
 - **Centralised error handling** — no stack traces leaked in production
 - **Request correlation IDs** (`x-request-id`) on every response for easier debugging and support
-- **Gmail SMTP** via Nodemailer using a Google App Password (never your real password)
+- **Resend Email API** over HTTPS for reliable hosted delivery
 - **Comprehensive test suite** — Jest + Supertest with mocked email service
 - **GitHub Actions CI** — runs lint and tests on every push and pull request
 - **Clean architecture** — config / routes / controllers / services / middleware / validators
@@ -53,7 +53,7 @@ A production-ready **Node.js + Express** backend service that powers the contact
 |---|---|
 | Runtime | Node.js ≥ 18 |
 | Framework | Express 4 |
-| Email | Nodemailer + Gmail SMTP |
+| Email | Resend API (HTTPS) |
 | Validation | Zod |
 | Security | Helmet, CORS, express-rate-limit |
 | Logging | Morgan |
@@ -165,10 +165,8 @@ cp .env.example .env
 | `PORT` | Optional. Port the server listens on. Defaults to `3000` locally and is usually provided by your host in production |
 | `NODE_ENV` | `development` \| `production` \| `test` |
 | `FRONTEND_URL` | Your React app's origin (used for CORS) |
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `465` |
-| `SMTP_USER` | Your Gmail address |
-| `SMTP_APP_PASSWORD` | A Google App Password (**not** your Gmail password) |
+| `RESEND_API_KEY` | Resend API key used to send contact emails over HTTPS |
+| `RESEND_FROM` | Optional from address shown in outgoing emails (default: `Portfolio Contact <onboarding@resend.dev>`) |
 | `CONTACT_TO_EMAIL` | The inbox that receives submissions |
 
 ---
@@ -195,17 +193,16 @@ The server starts on the configured `PORT`.
 
 ---
 
-## Creating a Google App Password
+## Configuring Resend
 
-Google App Passwords let an app authenticate with Gmail without using your real password.
+Use Resend to deliver contact emails over HTTPS (port 443), which is typically more reliable on hosted platforms.
 
-1. Go to your Google Account → **Security** → **2-Step Verification** (enable if not already on).
-2. Under 2-Step Verification, scroll to **App passwords**.
-3. Select app: **Mail** · Select device: **Other** → name it (e.g. "Portfolio API").
-4. Google generates a 16-character password — copy it immediately.
-5. Paste it as `SMTP_APP_PASSWORD` in your `.env` file.
+1. Create a Resend account and generate an API key.
+2. Add `RESEND_API_KEY` to your environment variables.
+3. Set `CONTACT_TO_EMAIL` to your inbox address.
+4. Optionally set `RESEND_FROM`.
 
-> ⚠️ Treat the App Password like a secret. Store it only in your environment variables, never in source code.
+> ⚠️ Treat API keys like secrets. Store them only in environment variables, never in source code.
 
 ---
 
@@ -323,7 +320,7 @@ The API is a standard Node.js process — it deploys to any platform that runs N
 
 ```bash
 fly launch
-fly secrets set SMTP_USER=... SMTP_APP_PASSWORD=... CONTACT_TO_EMAIL=... FRONTEND_URL=...
+fly secrets set RESEND_API_KEY=... CONTACT_TO_EMAIL=... FRONTEND_URL=...
 fly deploy
 ```
 
@@ -342,7 +339,7 @@ fly deploy
 | **HTTP header attacks** | Helmet sets secure response headers |
 | **CORS abuse** | Only the configured `FRONTEND_URL` origin is allowed |
 | **Stack trace leakage** | Error handler returns generic messages in production |
-| **Credential logging** | Morgan and app logs never include SMTP secrets |
+| **Credential logging** | Morgan and app logs never include API secrets |
 
 ---
 

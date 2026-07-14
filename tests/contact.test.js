@@ -2,10 +2,7 @@
 
 process.env.NODE_ENV = 'test';
 process.env.FRONTEND_URL = 'https://www.rebeccadrennan.co.uk';
-process.env.SMTP_HOST = 'smtp.gmail.com';
-process.env.SMTP_PORT = '465';
-process.env.SMTP_USER = 'test@example.com';
-process.env.SMTP_APP_PASSWORD = 'test_password';
+process.env.RESEND_API_KEY = 're_test_key';
 process.env.CONTACT_TO_EMAIL = 'owner@example.com';
 
 const request = require('supertest');
