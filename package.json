@@ -1,19 +1,21 @@
 {
   "name": "portfolio-contact-api",
   "version": "1.0.0",
-  "description": "Production-ready Node.js + Express contact form API for a portfolio website",
-  "main": "src/server.js",
+  "description": "Production-ready Node.js + Express contact form API using Resend to deliver to a Porkbun domain inbox",
+  "main": "dist/server.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
     "test": "jest --forceExit",
     "test:coverage": "jest --coverage --forceExit",
-    "lint": "eslint src tests --ext .js",
-    "lint:fix": "eslint src tests --ext .js --fix",
-    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
+    "lint": "eslint src tests --ext .ts",
+    "lint:fix": "eslint src tests --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "check": "npm run lint && npm run test"
   },
   "keywords": [
@@ -39,12 +41,24 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/compression": "^1.8.0",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.0.15",
+    "@types/supertest": "^6.0.3",
     "@eslint/js": "^9.6.0",
     "eslint": "^9.6.0",
     "globals": "^15.8.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "ts-jest": "^29.4.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.1"
   }
 }

@@ -1,8 +1,7 @@
-'use strict';
+import { randomUUID } from 'node:crypto';
+import type { RequestHandler } from 'express';
 
-const { randomUUID } = require('node:crypto');
-
-const requestId = (req, res, next) => {
+const requestId: RequestHandler = (req, res, next) => {
   const incomingRequestId = req.header('x-request-id');
   const id = typeof incomingRequestId === 'string' && incomingRequestId.trim()
     ? incomingRequestId.trim()
@@ -13,4 +12,4 @@ const requestId = (req, res, next) => {
   next();
 };
 
-module.exports = requestId;
+export default requestId;

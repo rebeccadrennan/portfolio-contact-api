@@ -1,14 +1,12 @@
-'use strict';
-
-const { z } = require('zod');
+import { z } from 'zod';
 
 // Basic patterns used to reject obvious script/HTML injection
-const noHtmlOrScript = (value) => {
+const noHtmlOrScript = (value: string): boolean => {
   const htmlOrScript = /<[^>]*>|javascript\s*:/i;
   return !htmlOrScript.test(value);
 };
 
-const contactSchema = z.object({
+export const contactSchema = z.object({
   name: z
     .string({ required_error: 'Name is required.' })
     .trim()
@@ -37,5 +35,3 @@ const contactSchema = z.object({
     .max(2000, 'Message must be at most 2000 characters.')
     .refine(noHtmlOrScript, 'Message must not contain HTML or script content.'),
 });
-
-module.exports = { contactSchema };

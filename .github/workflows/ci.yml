@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Lint & Test
+    name: Lint, Build & Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,6 +28,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Build
+        run: npm run build
 
       - name: Run tests
         run: npm test
